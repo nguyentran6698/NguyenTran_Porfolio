@@ -9,7 +9,7 @@ using namespace std;
 double sumOfVector(vector<double>);
 double findMean(vector<double>);
 double findMedian(vector<double>);
-double findRange(vector<double>);
+std::array<double,2> findRange(vector<double>);
 double compCovariance(vector<double> , vector<double>);
 double compCorrelation(vector<double> , vector<double>);
 /*Utils Function*/
@@ -45,6 +45,7 @@ int main(int argc, char** argv)
     }
     rm.resize(numObservations);
     medv.resize(numObservations);
+    std::array<double,2> res;
 
     cout << "new length " << rm.size() << endl;
     cout << "Closing file Boston.csv" << endl;
@@ -53,24 +54,23 @@ int main(int argc, char** argv)
     cout << "Number of records " << numObservations << endl;
     cout <<"---------------------------------------------------" << endl;
     // Sum of Records 
+    cout << "Running functions for rm vector ......" << endl;
+    res = findRange(rm);
     cout << "Sum of records rm: " << sumOfVector(rm) << endl;
-    cout << "Sum of records medv: " << sumOfVector(medv) << endl;
+    cout << "Mean of records rm: " << findMean(rm) << endl;
+    cout << "Median of records rm: " << findMedian(rm) << endl;
+    cout << "Range of records rm: " << "[ " << res[0] << " , " << res[1] << "]" << endl;
     cout <<"---------------------------------------------------" << endl;
     // Mean of the records
-    cout << "Mean of records rm: " << findMean(rm) << endl;
+    cout << "Running functions for medv vector ......" << endl;
+    res = findRange(medv);
+    cout << "Sum of records medv: " << sumOfVector(medv) << endl;
     cout << "Mean of records medv: " << findMean(medv) << endl;
-    cout <<"---------------------------------------------------" << endl;
-    // Median of the records 
-    cout << "Median of records rm: " << findMedian(rm) << endl;
     cout << "Median of records medv: " << findMedian(medv) << endl;
-    cout <<"---------------------------------------------------" << endl;
-    // Range of the records 
-    cout << "Range of records rm: " << findRange(rm) << endl;
-    cout << "Range of records medv: " << findRange(medv) << endl;
+    cout << "Range of records medv: " << "[ " << res[0] << " , " << res[1] << "]" << endl;
     cout <<"---------------------------------------------------" << endl;
     // Covariance of the records 
     cout << "Covariance of records: " << compCovariance(rm,medv) << endl;
-    cout <<"---------------------------------------------------" << endl;
     // Correlation of the records
     cout << "Correlation of records: " << compCorrelation(rm,medv) << endl;
 }
@@ -111,7 +111,7 @@ double compCovariance(vector<double> x, vector<double> y){
     double meanX = findMean(x);
     double meanY = findMean(y);
     double sumMean = 0.0;
-    int n = x.size() + y.size();
+    int n = x.size();
     for(int i = 0 ; i < x.size() ; i++){
         sumMean += (x.at(i) - meanX) * (y.at(i) - meanY); 
     }
@@ -140,7 +140,10 @@ double findMedian(vector<double> values){
         return values.at(middle);
     }
 }
-double findRange(vector<double> values){
-    return getMax(values) - getMin(values);
+std::array<double,2> findRange(vector<double> values){
+    std::array<double,2> res;
+    res[0] = getMax(values);
+    res[1] = getMin(values);
+    return res;
 }
 
