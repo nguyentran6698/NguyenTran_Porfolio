@@ -14,4 +14,4 @@ This is my portfolio for Intro to Machine Learning
 ### Linear Models
 
 [**Regression notebook**]
-[**Classification notebook**]
+[**Classification notebook**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/1fdda3fac2f3895fdc7191ed372475915ddc37db/Classification.pdf)
