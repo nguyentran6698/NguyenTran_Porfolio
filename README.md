@@ -15,3 +15,7 @@ This is my portfolio for Intro to Machine Learning
 
 [**Regression notebook**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/8d9ba2e302b3a651661214ef54c785a6fa32939c/Regression.pdf)\\
 [**Classification notebook**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/1fdda3fac2f3895fdc7191ed372475915ddc37db/Classification.pdf)
+
+### ML Algorithms from Scratch
+[**Logistic Regression**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/35d407578bc1d79439f99dae555fe350dac1f72c/LogisticRegression.cpp)\\
+[**Naive Bayes**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/35d407578bc1d79439f99dae555fe350dac1f72c/NaiveBayes.cpp)
