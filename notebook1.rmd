@@ -1,0 +1,259 @@
+---
+title: "Notebook 1"
+output: html_notebook
+author: Nguyen Tran
+---
+
+Data: [LondonAirBNB](https://www.kaggle.com/datasets/jinxzed/londonairbnb?select=Uphaar_listing.csv)
+
+```{r}
+library(readr)
+library(caret)
+library(tree)
+```
+
+### Cleaning Data
+
+```{r}
+df <- read.csv("Uphaar_listing.csv")
+head(df)
+```
+Dropping 'X', "city", "host_location", "street", 'host_since', "is_business_travel_ready" and "requires_license" and "id"
+```{r}
+exclude <- names(df) %in% c("X","city", "host_location", "street", "host_since","is_business_travel_ready", "requires_license", "id")
+df <- df[!exclude]
+```
+
+There is a need for transforming and cleaning this dataset. There are 41 columns, going through and figuring out which ones are factors 
+
+```{r}
+convert.to.numeric <- function(vector) {
+  vector <- as.numeric(as.factor(vector))-1
+}
+```
+
+Looking at the summary of dataframe to consider which ones need to be factorized.
+```{r}
+summary(df)
+```
+
+Encoding the following variables for data exploration
+
+```{r}
+
+encodables <- c("experiences_offered","host_is_superhost","host_has_profile_pic","host_identity_verified",
+                "is_location_exact","property_type","room_type_y","bed_type",
+                "instant_bookable","cancellation_policy","require_guest_profile_picture",
+                "require_guest_phone_verification")
+
+for(col in encodables) {
+  df[,col] <- convert.to.numeric(df[,col])
+}
+
+```
+
+security_deposit and cleaning_fee are characters currently, representing currency, parsing the numbers out of the column.
+```{r}
+df$security_deposit <- parse_number(df$security_deposit)
+df$cleaning_fee <- parse_number(df$cleaning_fee)
+```
+Exploring NA's in data to see if these can get replaced by the mean of the column.
+
+```{r}
+df$host_listings_count[is.na(df$host_listings_count)] <- mean(df$host_listings_count,na.rm=TRUE)
+df$bathrooms[is.na(df$bathrooms)] <- mean(df$bathrooms,na.rm=TRUE)
+df$bedrooms[is.na(df$bedrooms)] <- mean(df$bedrooms,na.rm=TRUE)
+df$beds[is.na(df$beds)] <- mean(df$beds,na.rm=TRUE)
+df$security_deposit[is.na(df$security_deposit)] <- mean(df$security_deposit,na.rm=TRUE)
+df$cleaning_fee[is.na(df$cleaning_fee)] <- mean(df$cleaning_fee,na.rm=TRUE)
+```
+
+
+```{r}
+head(df)
+```
+
+### Train / Test Split
+
+Splitting dataset into the training and test (80%/20%) 
+```{r}
+set.seed(123) # reproducibility
+i <- sample(1:nrow(df), nrow(df)*.80, replace=FALSE)
+train <- df[i,]
+test <- df[-i,]
+```
+
+```{r}
+train
+```
+
+### Exploring Data
+
+```{r}
+suppressWarnings(cor(train))
+```
+
+It appears the most correlated variables are: "host_listings_count", "room_type_y", "accomodates", "bathrooms", "bedrooms", "beds", "guests_included", "calculated_host_listings_count_y", "calculated_host_listings_count_entire_homes", "security_deposit", "cleaning_fee" relative to the target price_x. 
+
+It appears cleaning fees and security deposits are associated with lower range prices for the air bnb. 
+```{r}
+par(mfrow=c(1,2))
+plot(train$price_x, train$cleaning_fee)
+plot(train$price_x, train$security_deposit)
+par(mfrow=c(1,2))
+```
+```{r}
+par(mfrow=c(1,3))
+plot(train$price_x, train$accommodates)
+plot(train$price_x, train$bathrooms)
+plot(train$price_x, train$bedrooms)
+par(mfrow=c(1,3))
+```
+It appears most of the data tends to cluster around a relatively low price point per night, accommodating 15 or less, with around 5 or less bathrooms and less than 10 bedrooms. Interestingly, there are a few outliers, unbelievable ones really. Such as the mysteriously low-priced per night stay at a place with 50 bedrooms and around 35 bathrooms, accomodating over 30 people. I'd like to have that for myself to be honest haha. What a deal!
+
+Nonetheless, let's consider more datapoints to get a better view of what the data is telling us. 
+
+```{r}
+par(mfrow=c(1,2))
+plot(train$price_x, train$beds)
+plot(train$price_x, train$guests_included)
+par(mfrow=c(1,2))
+```
+
+So it appears other points tend to cluster in those same areas suggesting the same as implied before. 
+
+### Linear Regression
+
+```{r}
+mod <- lm(price_x ~ host_listings_count + accommodates + bathrooms + bedrooms + beds + guests_included, data=train)
+summary(mod)
+```
+It appears all of the independent variables are statistically significant, yet the R^2 is pretty low, nearing 9%.
+Let's see how well the model is predicting with respect to correlation and mean squared error.
+```{r}
+pred <- predict(mod, newdata=test)
+cor_lm <- cor(pred, test$price_x)
+mse_lm <- mean((pred-test$price_x)^2)
+print(paste("cor=", cor_lm))
+print(paste("mse=", mse_lm))
+```
+Darn. The correlation is low and the error is high. Let's inspect the model performance using residuals plot. 
+```{r}
+par(mfrow=c(2,2))
+plot(mod)
+par(mfrow=c(2,2))
+```
+It appears there's a good number of outliers sitting aside the line in the residuals vs fitted plot, the variance does not appear to be constant, as an assumption of linear model. In the scale-location plot this is seen as well, most of the points appear to cluster around 1 and extend to around 2, however, the number of outliers seem to point at a non-linear relationship being present in the data. In addition the normal q-q points that while most of the data fits to what appears to be linear, the end tail towards the upper theoretical quantile seems to skew away. It appears some of those outliers have high residual, indicating their poor fit by the model. 
+
+So it doesn't look like the relationship between these points and the data can be prescribed to a linear regression, let's explore the other kinds of regression.
+
+## KNN Regression
+
+We will explore KNN regression using the same variables used in the linear regression: price_x, host_listings_count, accommodates, bathrooms, bedrooms, beds, and guests_included
+
+
+```{r}
+set.seed(124) # reproducibility
+data <- subset(df, select = c(price_x, host_listings_count, accommodates, bathrooms, bedrooms, beds, guests_included))
+i <- sample(1:nrow(data), nrow(data)*.80, replace=FALSE)
+train <- data[i,]
+test <- data[-i,]
+```
+
+Clustering algorithms work best when the data is scaled. Let's scale the data.
+
+```{r}
+means <- sapply(train, mean)
+stdevs <- sapply(train, sd)
+train_scaled <- scale(train, center=means, scale=stdevs)
+test_scaled <- scale(test, center=means, scale=stdevs)
+```
+
+Let's test various values of k to find the best value for k. 
+```{r}
+cor_k <- rep(0,20)
+mse_k <- rep(0,20)
+i <- 1
+for(k in seq(1,39,2)) {
+  fit_k <- knnreg(train_scaled, train$price_x, k=k)
+  pred_k <- predict(fit_k, test_scaled)
+  cor_k[i] <- cor(pred_k, test$price_x)
+  mse_k[i] <- mean((pred_k - test$price_x)^2)
+  print(paste("k=",k,cor_k[i],mse_k[i]))
+  i <- i+1
+}
+```
+```{r}
+plot(1:20, cor_k, lwd=2, col='green', ylab="", yaxt='n')
+par(new=TRUE)
+plot(1:20, mse_k, lwd=2, col='purple', ylab="", labels=FALSE, yaxt='n')
+```
+
+It appears when k=3 we got the lowest MSE and the highest correlation, just to reiterate, let's fit a knn regression with k=3 and see our results. 
+
+```{r}
+fit <- knnreg(train_scaled, train$price_x, k=3)
+pred <- predict(fit, test_scaled)
+cor_knn <- cor(pred, test$price_x)
+mse_knn <- mean((pred-test$price_x)^2)
+print(paste("cor=", cor_knn))
+print(paste("mse=", mse_knn))
+```
+
+In so far, KNN regression appears to be heavily outperforming linear regression. Let's see if decision tree regression can improve it further.
+
+### Decision Tree Regression
+
+We will use the same columns used in the other two regressions. 
+
+```{r}
+set.seed(125) # reproducibility
+i <- sample(1:nrow(data), nrow(data)*0.80, replace=FALSE)
+train <- data[i,]
+test <- data[-i,]
+```
+
+```{r}
+tree1 <- tree(price_x~.,data=train)
+summary(tree1)
+```
+```{r}
+pred <- predict(tree1,newdata=test)
+cor_tree <- cor(pred, test$price_x)
+mse_tree <- mean((pred-test$price_x)^2)
+print(paste("cor=",cor_tree))
+print(paste("mse=",mse_tree))
+```
+```{r}
+plot(tree1)
+text(tree1, cex=0.5, pretty=0)
+```
+
+The tree only has 3 nodes, it's deviance is quite high, let's inspect cross validation.
+```{r}
+cv_tree <- cv.tree(tree1)
+plot(cv_tree$size, cv_tree$dev, type='b')
+```
+The middle ground appears to be at 2 nodes, pruning the tree to 2 terminal nodes, then plotting
+
+```{r}
+tree_pruned <- prune.tree(tree1, best=2)
+plot(tree_pruned)
+text(tree_pruned, pretty=0)
+```
+The correlation and mse for the original tree were the worst in so far. Measuring for the pruned tree, let's see if it improves.
+```{r}
+pred_pruned <- predict(tree_pruned, newdata=test)
+cor_pruned <- cor(pred_pruned, test$price_x)
+mse_pruned <- mean((pred_pruned-test$price_x)^2)
+print(paste("corr=",cor_pruned))
+print(paste("mse=",mse_pruned))
+```
+Nope, apparently not. The correlation went down and the mse raised. This was the worst result of all the regressions. 
+
+
+
+### Analysis
+
+Out of the three models explored in this notebook: linear regression, knn regression, and decision tree regression, the most performant was knn regression. There was apparent clustering as a result of data exploration. We could clearly see clustering relationships between the target and multiple predictors, showing a similar relationship. The goodness of fit for the linear regression was poor as there were many outliers present in the data. The knn clustering algorithm helped reduce the group size to just 3 clusters, while minimizing the mean absolute error and maximizing the correlation. The decision tree regression wasn't as helpful in this regard as a highly deviant tree of only three nodes was constructed, leaving the middle ground of two terminal nodes to be as deviant. 
+
