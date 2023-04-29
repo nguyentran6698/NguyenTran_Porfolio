@@ -27,3 +27,5 @@ This is my portfolio for Intro to Machine Learning
 ### Image Classification with DL
 [**Code Base**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/1a057b13c9c23f3951d19c8df89e191f73a0a016/Image%20Classification%20with%20DL.ipynb)\\
 [**Analytics**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/1a057b13c9c23f3951d19c8df89e191f73a0a016/ImageClassification.pdf)
+
+[**My Technical Skill**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/810fdc2834129e79c241c319bbc673e89ca3b665/Resume-2023-Intern.pdf)
