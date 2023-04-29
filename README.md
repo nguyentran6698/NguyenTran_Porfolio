@@ -27,5 +27,7 @@ This is my portfolio for Intro to Machine Learning
 ### Image Classification with DL
 [**Code Base**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/1a057b13c9c23f3951d19c8df89e191f73a0a016/Image%20Classification%20with%20DL.ipynb)\\
 [**Analytics**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/1a057b13c9c23f3951d19c8df89e191f73a0a016/ImageClassification.pdf)
-
+### My Technical Skill
 [**My Technical Skill**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/810fdc2834129e79c241c319bbc673e89ca3b665/Resume-2023-Intern.pdf)
+### My Passion About Technology
+I have a great enthusiasm for Machine Learning and its potential to change the world. I am constantly seeking new ways to improve my skills in this rapidly evolving field. In the future, I plan to work on personal projects that will challenge me to develop new machine learning models and techniques, such as creating an algorithm for detecting fake news or developing a chatbot that can understand and respond to natural language queries. To keep up with the latest trends and advancements in the field, I plan to attend conferences, workshops, and online courses. Additionally, I am interested in exploring possible employment opportunities in Machine Learning, as I believe this field has endless potential to innovate and make a positive impact on society.
