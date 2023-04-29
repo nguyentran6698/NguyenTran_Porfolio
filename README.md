@@ -19,3 +19,11 @@ This is my portfolio for Intro to Machine Learning
 ### ML Algorithms from Scratch
 [**Logistic Regression**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/35d407578bc1d79439f99dae555fe350dac1f72c/LogisticRegression.cpp)\\
 [**Naive Bayes**](https://github.com/nguyentran6698/NguyenTran_Porfolio/blob/35d407578bc1d79439f99dae555fe350dac1f72c/NaiveBayes.cpp)
+### Similarity and Ensemble
+[**Codebase]
+### Python ML with sklearn
+[**Code Base]
+[**Analytics]
+### Image Classification with DL
+[**Code Base]
+[**Analytics]
